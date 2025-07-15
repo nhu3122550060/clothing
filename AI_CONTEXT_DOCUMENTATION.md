@@ -539,11 +539,36 @@ git commit -m "docs(api): update product endpoint documentation"
 - **Security**: Check for security vulnerabilities
 
 #### Docker Development
-- **Container Management**: Use docker-compose for local development
+- **Container Management**: Use `make` commands for Docker operations
 - **Port Mapping**: Consistent port assignments (9090, 9091, 3311)
 - **Volume Mounting**: Live reload with volume mapping
 - **Environment**: Separate development and production configurations
-- **Health Checks**: Implement health checks for services
+- **Make Commands**: Always prefer `make` over direct docker-compose commands
+
+#### Make Command Best Practices
+- **Start Development**: Use `make up` instead of `docker-compose up -d`
+- **Container Access**: Use `make app-shell` for application container access
+- **Database Access**: Use `make mysql` for quick database connections
+- **Troubleshooting**: Use `make safe-restart` for clean environment reset
+- **Monitoring**: Use `make logs` to monitor application logs
+- **Status Check**: Use `make ps` to verify container status
+
+```makefile
+# Example: Makefile structure for consistent commands
+up:
+	docker-compose up -d --build
+
+down:
+	docker-compose down
+
+app-shell:
+	docker-compose exec app bash
+
+mysql:
+	docker-compose exec db mysql -u clothing_user -pclothing_password clothing_db
+
+safe-restart: force-cleanup up
+```
 
 ```dockerfile
 # Good: Dockerfile with proper practices
@@ -838,9 +863,49 @@ final readonly class AuthService
 
 ## Development Commands
 
-### Local Development
+### Make Commands (Preferred Method)
+
+The project uses a **Makefile** for simplified command execution. Always use `make` commands for consistency and ease of use:
+
+#### Docker Management
 ```bash
-# Start containers
+# Start all containers (build if necessary)
+make up
+
+# Stop all containers
+make down
+
+# View container logs (follow mode)
+make logs
+
+# Restart containers (down then up)
+make restart
+
+# Show container status
+make ps
+
+# Safe restart with cleanup
+make safe-restart
+
+# Force cleanup (emergency use)
+make force-cleanup
+```
+
+#### Container Access
+```bash
+# Access application container shell
+make app-shell
+
+# Access MySQL database directly
+make mysql
+
+# Open PHPMyAdmin in browser
+make phpmyadmin
+```
+
+### Local Development (Alternative)
+```bash
+# Start containers (direct docker-compose)
 docker-compose up -d
 
 # Run tests
@@ -858,7 +923,7 @@ composer qa
 
 ### Framework Commands
 ```bash
-# Start development server
+# Start development server (inside container)
 php tempest serve
 
 # Run console commands
@@ -866,6 +931,47 @@ php tempest [command]
 
 # Generate framework components
 php tempest discovery:generate
+```
+
+### Development Workflow with Make
+
+#### Daily Development
+```bash
+# Start development environment
+make up
+
+# Check container status
+make ps
+
+# View logs if needed
+make logs
+
+# Access app container for development
+make app-shell
+
+# Inside container: run tests, format code, etc.
+composer qa
+```
+
+#### Database Operations
+```bash
+# Quick database access
+make mysql
+
+# Or use PHPMyAdmin interface
+make phpmyadmin
+```
+
+#### Troubleshooting
+```bash
+# Simple restart
+make restart
+
+# If having issues, use safe restart
+make safe-restart
+
+# Emergency cleanup (last resort)
+make force-cleanup
 ```
 
 ## Environment Configuration
@@ -887,15 +993,16 @@ php tempest discovery:generate
 When working on this project, AI agents should:
 
 1. **Follow Strict Typing**: Always use `declare(strict_types=1);` and proper type hints
-2. **Maintain Code Quality**: Run formatting and linting tools before commits
-3. **Write Tests**: Create corresponding tests for new features with proper coverage
-4. **Use Framework Conventions**: Leverage Tempest's attribute-based system and dependency injection
-5. **Respect Docker Setup**: Work within the containerized environment
-6. **Follow PSR Standards**: Adhere to PSR-4 autoloading and PSR-12 coding standards
-7. **Security First**: Implement proper input validation and output escaping
-8. **Documentation**: Write comprehensive documentation for all public APIs
-9. **Error Handling**: Implement proper exception handling and logging
-10. **Performance**: Consider performance implications of code changes
+2. **Use Make Commands**: Always use `make` commands instead of direct docker-compose commands
+3. **Maintain Code Quality**: Run formatting and linting tools before commits
+4. **Write Tests**: Create corresponding tests for new features with proper coverage
+5. **Use Framework Conventions**: Leverage Tempest's attribute-based system and dependency injection
+6. **Respect Docker Setup**: Work within the containerized environment using make commands
+7. **Follow PSR Standards**: Adhere to PSR-4 autoloading and PSR-12 coding standards
+8. **Security First**: Implement proper input validation and output escaping
+9. **Documentation**: Write comprehensive documentation for all public APIs
+10. **Error Handling**: Implement proper exception handling and logging
+11. **Performance**: Consider performance implications of code changes
 
 ### Code Review Checklist for AI Agents
 
@@ -913,5 +1020,39 @@ Before submitting code, ensure:
 - [ ] Documentation updated for new features
 - [ ] No security vulnerabilities introduced
 - [ ] Performance considerations addressed
+- [ ] **Make commands used for all Docker operations**
+
+### Development Environment Setup
+
+#### Quick Start with Make Commands
+```bash
+# 1. Start development environment
+make up
+
+# 2. Check container status
+make ps
+
+# 3. Access application container
+make app-shell
+
+# 4. Inside container: run quality checks
+composer qa
+
+# 5. View logs if needed
+make logs
+
+# 6. Access database when needed
+make mysql
+```
+
+#### Troubleshooting with Make
+```bash
+# If containers are not working properly
+make safe-restart
+
+# If you need to start fresh
+make force-cleanup
+make up
+```
 
 This documentation serves as the foundation for consistent development practices and helps maintain code quality across the project lifecycle.
